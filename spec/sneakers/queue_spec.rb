@@ -35,6 +35,7 @@ describe Sneakers::Queue do
     before do
       @mkbunny = Object.new
       @mkqueue_nondurable = Object.new
+      @mkqueue_nondeclared = Object.new
 
       mock(@mkbunny).start {}
       mock(@mkbunny).create_channel{ @mkchan }
@@ -97,6 +98,19 @@ describe Sneakers::Queue do
 
         q.subscribe(@mkworker)
         myqueue = q.instance_variable_get(:@queue)
+      end
+
+      describe "with :consume_from_sharded_pseudoqueue => true" do
+        it "creates a queue with :no_declare => true and does not create any bindings" do
+          queue_name = "sharded_pseudoqueue"
+          mock(@mkchan).queue(queue_name, {:durable => true, :no_declare => true}) { @mkqueue_nondeclared }
+          stub(@mkqueue_nondeclared).bind do
+            raise "bind should not be called"
+          end
+          stub(@mkqueue_nondeclared).subscribe
+          q = Sneakers::Queue.new(queue_name, queue_vars.merge(:consume_from_sharded_pseudoqueue => true))
+          q.subscribe(@mkworker)
+        end
       end
     end
 

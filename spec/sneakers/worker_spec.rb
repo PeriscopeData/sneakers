@@ -225,7 +225,8 @@ describe Sneakers::Worker do
           :hooks => {},
           :handler => Sneakers::Handlers::Oneshot,
           :heartbeat => 30,
-          :amqp_heartbeat => 30
+          :amqp_heartbeat => 30,
+          :consume_from_sharded_pseudoqueue => false,
         )
       end
 
@@ -264,7 +265,8 @@ describe Sneakers::Worker do
           :hooks => {},
           :handler => Sneakers::Handlers::Oneshot,
           :heartbeat => 5,
-          :amqp_heartbeat => 30
+          :amqp_heartbeat => 30,
+          :consume_from_sharded_pseudoqueue => false,
         )
       end
 
@@ -303,7 +305,8 @@ describe Sneakers::Worker do
           :hooks => {},
           :handler => Sneakers::Handlers::Oneshot,
           :heartbeat => 30,
-          :amqp_heartbeat => 30
+          :amqp_heartbeat => 30,
+          :consume_from_sharded_pseudoqueue => false,
         )
       end
     end
