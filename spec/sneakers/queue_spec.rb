@@ -112,6 +112,16 @@ describe Sneakers::Queue do
           q.subscribe(@mkworker)
         end
       end
+
+      describe "with :queue_subscribe_exclusive => true" do
+        it "subscribes to the queue with :exclusive => true" do
+          mock(@mkchan).queue("downloads", :durable => true) { @mkqueue }
+          stub(@mkqueue).bind
+          mock(@mkqueue).subscribe(:block => false, :manual_ack => true, :exclusive => true)
+          q = Sneakers::Queue.new("downloads", queue_vars.merge(:queue_subscribe_exclusive => true))
+          q.subscribe(@mkworker)
+        end
+      end
     end
 
     describe "#subscribe with default exchange" do

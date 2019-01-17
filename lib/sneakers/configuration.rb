@@ -49,6 +49,7 @@ module Sneakers
       :queue_options      => QUEUE_OPTION_DEFAULTS,
 
       :consume_from_sharded_pseudoqueue => false,
+      :queue_subscribe_exclusive => false,
     }.freeze
 
 

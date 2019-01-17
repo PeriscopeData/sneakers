@@ -227,6 +227,7 @@ describe Sneakers::Worker do
           :heartbeat => 30,
           :amqp_heartbeat => 30,
           :consume_from_sharded_pseudoqueue => false,
+          :queue_subscribe_exclusive => false
         )
       end
 
@@ -267,6 +268,7 @@ describe Sneakers::Worker do
           :heartbeat => 5,
           :amqp_heartbeat => 30,
           :consume_from_sharded_pseudoqueue => false,
+          :queue_subscribe_exclusive => false
         )
       end
 
@@ -307,6 +309,7 @@ describe Sneakers::Worker do
           :heartbeat => 30,
           :amqp_heartbeat => 30,
           :consume_from_sharded_pseudoqueue => false,
+          :queue_subscribe_exclusive => false
         )
       end
     end
