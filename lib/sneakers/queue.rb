@@ -34,11 +34,13 @@ class Sneakers::Queue
     # TODO: get the arguments from the handler? Retry handler wants this so you
     # don't have to line up the queue's dead letter argument with the exchange
     # you'll create for retry.
-    queue = @channel.queue(@name, @opts[:queue_options])
+    queue_opts = @opts[:queue_options]
+    queue_opts[:no_declare] = true if @opts[:consume_from_sharded_pseudoqueue]
+    queue = @channel.queue(@name, queue_opts)
 
     if exchange_name.length > 0
       routing_keys.each do |key|
-        queue.bind(@exchange, :routing_key => key)
+        queue.bind(@exchange, :routing_key => key) unless @opts[:consume_from_sharded_pseudoqueue]
       end
     end
 
@@ -49,7 +51,13 @@ class Sneakers::Queue
     handler_klass = worker.opts[:handler] || Sneakers::CONFIG.fetch(:handler)
     handler = handler_klass.new(@channel, queue, worker.opts)
 
-    @consumer = queue.subscribe(:block => false, :manual_ack => @opts[:ack]) do | delivery_info, metadata, msg |
+    queue_subscribe_opts = {
+      :block => false,
+      :manual_ack => @opts[:ack],
+    }
+    queue_subscribe_opts[:exclusive] = true if @opts[:queue_subscribe_exclusive]
+
+    @consumer = queue.subscribe(queue_subscribe_opts) do | delivery_info, metadata, msg |
       worker.do_work(delivery_info, metadata, msg, handler)
     end
     nil

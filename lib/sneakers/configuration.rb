@@ -46,7 +46,10 @@ module Sneakers
       :hooks              => {},
       :exchange           => 'sneakers',
       :exchange_options   => EXCHANGE_OPTION_DEFAULTS,
-      :queue_options      => QUEUE_OPTION_DEFAULTS
+      :queue_options      => QUEUE_OPTION_DEFAULTS,
+
+      :consume_from_sharded_pseudoqueue => false,
+      :queue_subscribe_exclusive => false,
     }.freeze
 
 
