@@ -50,6 +50,7 @@ module Sneakers
 
       :consume_from_sharded_pseudoqueue => false,
       :queue_subscribe_exclusive => false,
+      :queue_subscribe_attempts => 10,
     }.freeze
 
 

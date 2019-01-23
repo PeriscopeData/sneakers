@@ -227,7 +227,8 @@ describe Sneakers::Worker do
           :heartbeat => 30,
           :amqp_heartbeat => 30,
           :consume_from_sharded_pseudoqueue => false,
-          :queue_subscribe_exclusive => false
+          :queue_subscribe_exclusive => false,
+          :queue_subscribe_attempts => 10,
         )
       end
 
@@ -268,7 +269,8 @@ describe Sneakers::Worker do
           :heartbeat => 5,
           :amqp_heartbeat => 30,
           :consume_from_sharded_pseudoqueue => false,
-          :queue_subscribe_exclusive => false
+          :queue_subscribe_exclusive => false,
+          :queue_subscribe_attempts => 10,
         )
       end
 
@@ -309,7 +311,8 @@ describe Sneakers::Worker do
           :heartbeat => 30,
           :amqp_heartbeat => 30,
           :consume_from_sharded_pseudoqueue => false,
-          :queue_subscribe_exclusive => false
+          :queue_subscribe_exclusive => false,
+          :queue_subscribe_attempts => 10,
         )
       end
     end
@@ -346,6 +349,40 @@ describe Sneakers::Worker do
       stub(q).name{ "test" }
       stub(q).opts { nil }
       w.run
+    end
+
+    describe "queue.subscribe retry behavior" do
+      it "raises if queue.subscribe raises something other than a Bunny::Exception" do
+        q = Object.new
+        w = DummyWorker.new(q)
+        stub(q).subscribe { raise ArgumentError }
+        stub(q).name{ "test" }
+        stub(q).opts { nil }
+        proc { w.run }.must_raise ArgumentError
+      end
+
+      it "retries when queue.subscribe attempts is less than opts[:queue_subscribe_attempts]" do
+        q = Object.new
+        w = DummyWorker.new(q)
+        w.opts.to_hash[:queue_subscribe_attempts].must_equal(10)
+        calls = 0
+        stub(q).subscribe do
+          calls += 1
+          raise Bunny::Exception if calls <= 5
+        end
+        stub(q).name{ "test" }
+        stub(q).opts { nil }
+        w.run
+      end
+
+      it "reraises when queue.subscribe attempts equals or exceeds opts[:queue_subscribe_attempts]" do
+        q = Object.new
+        w = DummyWorker.new(q)
+        stub(q).subscribe { raise Bunny::Exception }
+        stub(q).name{ "test" }
+        stub(q).opts { nil }
+        proc { w.run }.must_raise Bunny::Exception
+      end
     end
   end
 
