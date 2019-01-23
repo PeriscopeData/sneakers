@@ -111,7 +111,19 @@ module Sneakers
 
     def run
       worker_trace "New worker: subscribing."
-      @queue.subscribe(self)
+      begin
+        attempt ||= 0
+        @queue.subscribe(self)
+      rescue Bunny::Exception => ex
+        attempt += 1
+        if attempt < @opts[:queue_subscribe_attempts]
+          Sneakers.logger.warn "New worker: retrying queue subscribe. attempt=#{attempt} error: #{ex.message}"
+          retry
+        else
+          Sneakers.logger.error "New worker: retrying queue subscribe. attempt=#{attempt} error: #{ex.message}"
+          raise
+        end
+      end
       worker_trace "New worker: I'm alive."
     end
 
