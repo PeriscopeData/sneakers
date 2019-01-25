@@ -57,10 +57,17 @@ class Sneakers::Queue
     }
     queue_subscribe_opts[:exclusive] = true if @opts[:queue_subscribe_exclusive]
 
-    @consumer = queue.subscribe(queue_subscribe_opts) do | delivery_info, metadata, msg |
-      worker.do_work(delivery_info, metadata, msg, handler)
+    begin
+      @consumer = queue.subscribe(queue_subscribe_opts) do | delivery_info, metadata, msg |
+        worker.do_work(delivery_info, metadata, msg, handler)
+      end
+      nil
+    rescue StandardError
+      @consumer&.cancel
+      @channel&.close
+      @bunny&.close
+      raise
     end
-    nil
   end
 
   def unsubscribe
