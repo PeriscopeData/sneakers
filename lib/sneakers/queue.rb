@@ -83,6 +83,7 @@ class Sneakers::Queue
     Bunny.new(@opts[:amqp], :vhost => @opts[:vhost],
                             :heartbeat => @opts[:heartbeat],
                             :properties => @opts.fetch(:properties, {}),
+                            :recovery_attempts => 2,
                             :logger => Sneakers::logger)
   end
   private :create_bunny_connection
