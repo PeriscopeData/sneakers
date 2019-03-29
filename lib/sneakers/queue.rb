@@ -83,6 +83,8 @@ class Sneakers::Queue
     Bunny.new(@opts[:amqp], :vhost => @opts[:vhost],
                             :heartbeat => @opts[:heartbeat],
                             :properties => @opts.fetch(:properties, {}),
+                            # Retry recovery up to at least 10 minutes (120 * 5 seconds)
+                            :recovery_attempts => 120,
                             :logger => Sneakers::logger)
   end
   private :create_bunny_connection
